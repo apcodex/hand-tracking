@@ -64,7 +64,6 @@ const Webcam = () => {
                     context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
 
                     canvas.toBlob((blob) => {
-                        console.log(blob)
                         const reader = new FileReader();
                         reader.onloadend = () => {
                             const base64String = reader.result;

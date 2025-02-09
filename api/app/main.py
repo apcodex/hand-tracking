@@ -54,7 +54,7 @@ async def websocket_endpoint(websocket: WebSocket):
     except RuntimeError:
         print("[ error ] client closed the socket")
 
-app.mount("/", StaticFiles(directory=r"../web/out/", html=True), name="/")
+app.mount("/", StaticFiles(directory=r"static", html=True), name="/")
 
 if __name__ == "__main__":
     uvicorn.run("app.main:app", port=5000, log_level="info")
