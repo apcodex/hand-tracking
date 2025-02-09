@@ -1,3 +1,5 @@
+import time
+
 import cv2
 import numpy as np
 import uvicorn
@@ -25,6 +27,7 @@ def encode_jpeg_to_text(frame):
     if ret:
         img_bytes = encoded_img.tobytes()
         base64_string = base64.b64encode(img_bytes).decode('utf-8')
+        return base64_string
         data_url = f"data:image/jpeg;base64,{base64_string}"
         return data_url
 
@@ -34,6 +37,7 @@ async def websocket_endpoint(websocket: WebSocket):
     print(f"Client connected: {websocket.client_state}")
     try:
         while True:
+            # _start_time = time.time()
             message = await websocket.receive_text()
 
             img = decode_text_to_jpeg(message)
@@ -43,6 +47,7 @@ async def websocket_endpoint(websocket: WebSocket):
             frame = run_hand_tracking_server(img)
             data_url = encode_jpeg_to_text(frame)
             await websocket.send_text(data_url)
+            # print("[ TIME ] ", time.time() - _start_time)
     except Exception as e:
         print(f"WebSocket error: {e}")
     finally:
