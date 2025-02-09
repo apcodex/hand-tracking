@@ -16,8 +16,8 @@ const Webcam = () => {
         try {
 
 
-            // websocket.current = new WebSocket('/websocket');
-            websocket.current = new WebSocket('ws://127.0.0.1:8000/websocket');
+            websocket.current = new WebSocket('/websocket');
+            // websocket.current = new WebSocket('ws://127.0.0.1:8000/websocket');
 
             websocket.current.onopen = async () => {
                 toast.success("Connected to websocket", {
