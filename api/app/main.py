@@ -27,7 +27,7 @@ def encode_jpeg_to_text(frame):
     if ret:
         img_bytes = encoded_img.tobytes()
         base64_string = base64.b64encode(img_bytes).decode('utf-8')
-        return base64_string
+        # return base64_string
         data_url = f"data:image/jpeg;base64,{base64_string}"
         return data_url
 

@@ -16,8 +16,8 @@ const Webcam = () => {
         try {
 
 
-            websocket.current = new WebSocket('/websocket');
-            // websocket.current = new WebSocket('ws://127.0.0.1:8000/websocket');
+            // websocket.current = new WebSocket('/websocket');
+            websocket.current = new WebSocket('ws://127.0.0.1:8000/websocket');
 
             websocket.current.onopen = async () => {
                 toast.success("Connected to websocket", {
@@ -27,53 +27,46 @@ const Webcam = () => {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 videoRef.current.srcObject = stream;
                 videoRef.current.play();
-                intervalId.current = setInterval(sendFrame, 100); // Adjust frame rate (milliseconds)
+                intervalId.current = setInterval(sendFrame, 300); // Adjust frame rate (milliseconds)
 
             };
 
             websocket.current.onerror = (error) => {
-                toast.error("websocket connection failed", {
+                toast.error("websocket error", {
                     position: 'top-right',
                     description: error.message,
                 })
             };
 
             websocket.current.onclose = () => {
-                console.log('WebSocket connection closed');
+                toast.error("websocket connection closed", {
+                    position: 'top-right',
+                })
             };
 
             websocket.current.onmessage = (event) => {
-                if (typeof event.data === 'string') {  // Check if it's a string (base64)
-                    setProcessedStream(event.data); // Directly set the base64 string
-                } else if (event.data instanceof Blob) { // Check if it's a Blob (less likely in this case)
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                        const base64String = reader.result;
-                        setProcessedStream(base64String);
-                    };
-                    reader.readAsDataURL(event.data);
-                }
+                setProcessedStream(event.data);
             };
 
             const sendFrame = () => {
-                if (websocket.current && websocket.current.readyState === WebSocket.OPEN) {
-                    const canvas = canvasRef.current;
-                    canvas.width = videoRef.current.videoWidth;
-                    canvas.height = videoRef.current.videoHeight;
-                    const context = canvas.getContext('2d');
-                    context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-
-                    canvas.toBlob((blob) => {
-                        const reader = new FileReader();
-                        reader.onloadend = () => {
-                            const base64String = reader.result;
-                            websocket.current.send(base64String);
-                        };
-                        reader.readAsDataURL(blob);
-                    }, 'image/jpeg', 0.8); // JPEG quality 0.8
-                } else {
+                if (!(websocket.current && websocket.current.readyState === WebSocket.OPEN)) {
                     console.log("WebSocket is not open. Cannot send frame.");
-                }
+                    return
+                } 
+                const canvas = canvasRef.current;
+                canvas.width = videoRef.current.videoWidth;
+                canvas.height = videoRef.current.videoHeight;
+                const context = canvas.getContext('2d');
+                context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+
+                canvas.toBlob((blob) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        const base64String = reader.result;
+                        websocket.current.send(base64String);
+                    };
+                    reader.readAsDataURL(blob);
+                }, 'image/jpeg', 0.8); // JPEG quality 0.8
             };
 
 
